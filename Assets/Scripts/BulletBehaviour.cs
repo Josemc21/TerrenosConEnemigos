@@ -2,52 +2,37 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
 public class BulletBehaviour : MonoBehaviour
 {
-    // Bullet Variables
-    public float speed = 10.0f;                 // Bullet Base Speed
-    float damage = 1;                           // Bullet Base Damage
-    public LayerMask capasDestruir;             // Collision Layer
+    private float bulletSpeed = 100.0f;
+    private float bulletDMG = 1.0f;
 
+    public float rotX;
+    public float rotY;
+    public float rotZ;
+    // Start is called before the first frame update
+    void Start()
+    {
+        
+    }
+
+    // Update is called once per frame
     void Update()
     {
-        // Bullet Movement
-        float moveDistance = Time.deltaTime * speed;
-        transform.Translate(Vector3.forward * moveDistance);
-
-        // Collision Control
-        CheckCollision(moveDistance);
+        float movement = Time.deltaTime * bulletSpeed;
+        transform.Translate(Vector3.forward * movement);
+        rotX = gameObject.transform.rotation.x;
+        rotY = gameObject.transform.rotation.y;
+        rotZ = gameObject.transform.rotation.z;
     }
 
-    void CheckCollision(float moveDistance)
+    void OnTriggerEnter(Collider collider)
     {
-        // Collision Control
-        Ray ray = new Ray(transform.position, transform.forward);
-        RaycastHit hit;
-
-        if (Physics.Raycast(ray, out hit, moveDistance, capasDestruir, QueryTriggerInteraction.Collide))
+        if (collider.gameObject.tag == "Enemy")
         {
-            // Enemy Hit Control
-            if(hit.collider.tag == "Enemy")
-            {
-                IHealthControl healthyObject = hit.collider.GetComponent<IHealthControl>();
-                if (healthyObject != null)
-                {
-                    healthyObject.TakeHit(damage, hit);
-                }
-            }
+            Debug.Log("Enemy hit");
+            collider.SendMessage("Hit", bulletDMG, SendMessageOptions.DontRequireReceiver);
             Destroy(gameObject);
         }
-        
-        // Bullet destruction if no collision
-        StartCoroutine(DelayedBulletDestroy());
-    }
-
-    // Auxiliar Destruction Function
-    IEnumerator DelayedBulletDestroy()
-    {
-        yield return new WaitForSeconds(10f);
-        Destroy(gameObject);
     }
 }

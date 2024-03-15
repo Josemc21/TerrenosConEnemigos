@@ -5,8 +5,6 @@ TagManager:
   serializedVersion: 2
   tags:
   - Enemy
-  - Obstacle
-  - Audio
   layers:
   - Default
   - TransparentFX
@@ -17,7 +15,7 @@ TagManager:
   - 
   - 
   - 
-  - Collisions
+  - GunVisibilityLayer
   - 
   - 
   - 
