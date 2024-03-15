@@ -9,7 +9,6 @@ public class ShootWeapon : MonoBehaviour
     private new Animation animation;
 
     // Bullet Shoot Control
-    Transform bulletExit;
     float nextShot = 0f;
     float cooldown = 0.3f;
     public GameObject bulletModel;
@@ -19,25 +18,34 @@ public class ShootWeapon : MonoBehaviour
         // Audio & Animation Get
         audioSource = GetComponent<AudioSource>();
         animation = GetComponent<Animation>();
-
-        // Bullet Exit Get
-        bulletExit = gameObject.transform.GetChild(0).transform;
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         if (Time.time >= nextShot && Input.GetMouseButtonDown(0))
         {
-            // Bullet Creation 
-            nextShot = Time.time + cooldown;
-            Debug.Log("Shot fired");
-            GameObject newBullet = Instantiate(bulletModel, bulletExit.position, bulletExit.rotation);
+            // Find the object with the "BulletExit" tag
+            GameObject bulletExit = GameObject.FindWithTag("BulletExit");
 
-            // Audio & Animation Player
-            audioSource.Play();
-            animation.wrapMode = WrapMode.Once;
-            animation.Play();
+            if (bulletExit != null)
+            {
+                // Get the direction the player is looking
+                Vector3 shootDirection = Camera.main.transform.forward;
+
+                // Bullet Creation
+                nextShot = Time.time + cooldown;
+                GameObject newBullet = Instantiate(bulletModel, bulletExit.transform.position, Quaternion.LookRotation(shootDirection));
+
+                // Audio & Animation Player
+                audioSource.Play();
+                animation.wrapMode = WrapMode.Once;
+                animation.Play();
+            }
+            else
+            {
+                Debug.LogError("No object found with the 'BulletExit' tag.");
+            }
         }
     }
 }

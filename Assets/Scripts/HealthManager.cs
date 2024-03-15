@@ -14,7 +14,6 @@ public class HealthManager : MonoBehaviour
 
     void Hit(float damage)
     {
-        Debug.Log("I got hit");
         health -= damage;
         beenHit.Invoke();
         if (health <= 0)

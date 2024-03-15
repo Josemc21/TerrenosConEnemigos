@@ -5,6 +5,11 @@ TagManager:
   serializedVersion: 2
   tags:
   - Enemy
+  - Fire
+  - BulletExit
+  - EnemyBody
+  - EnemyHead
+  - Spider
   layers:
   - Default
   - TransparentFX

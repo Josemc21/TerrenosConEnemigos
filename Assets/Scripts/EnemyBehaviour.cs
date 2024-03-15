@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Microsoft.Unity.VisualStudio.Editor;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -11,28 +10,40 @@ public class EnemyBehaviour : MonoBehaviour
     float remainingHealth;
     public GameObject healthBar;
 
-
     void Start()
     {
         target = GameObject.FindGameObjectWithTag("Player").transform;
         pathfinder = GetComponent<NavMeshAgent>();
+        remainingHealth = GetComponent<HealthManager>().maxHealth;
     }
 
-    // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         pathfinder.SetDestination(target.position);
     }
 
-    public void beenHit()
+    public void Hit(float damage)
     {
-        Debug.Log("" + gameObject.name + " has been hit!");
-        remainingHealth = GetComponent<HealthManager>().health / GetComponent<HealthManager>().maxHealth;
-        healthBar.transform.localScale = new Vector3(remainingHealth, 1, 1);
+        // Reduce health
+        remainingHealth -= damage;
+
+        // Update health bar
+        UpdateHealthBar();
+
+        if (remainingHealth <= 0)
+        {
+            Die();
+        }
     }
 
-    public void gotKilled()
+    public void Die()
     {
-        Debug.Log("" + gameObject.name + " has been killed!");
+        Destroy(gameObject);
+    }
+
+    void UpdateHealthBar()
+    {
+        float healthRatio = remainingHealth / GetComponent<HealthManager>().maxHealth;
+        healthBar.transform.localScale = new Vector3(healthRatio, 1, 1);
     }
 }

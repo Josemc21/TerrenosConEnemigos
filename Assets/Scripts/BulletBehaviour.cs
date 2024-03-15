@@ -7,32 +7,35 @@ public class BulletBehaviour : MonoBehaviour
     private float bulletSpeed = 100.0f;
     private float bulletDMG = 1.0f;
 
-    public float rotX;
-    public float rotY;
-    public float rotZ;
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         float movement = Time.deltaTime * bulletSpeed;
         transform.Translate(Vector3.forward * movement);
-        rotX = gameObject.transform.rotation.x;
-        rotY = gameObject.transform.rotation.y;
-        rotZ = gameObject.transform.rotation.z;
+
+        RaycastHit hit;
+        Vector3 direction = transform.forward;
+
+        if (Physics.Raycast(transform.position, direction, out hit, movement))
+        {
+            if (hit.collider.gameObject.tag == "EnemyHead")
+            {
+                HitEnemy(hit.collider.gameObject, true); // Se pasa true para indicar que es un golpe en la cabeza
+            }
+            else if (hit.collider.gameObject.tag == "EnemyBody")
+            {
+                HitEnemy(hit.collider.gameObject, false); // Se pasa false para indicar que es un golpe en el cuerpo
+            }
+        }
     }
 
-    void OnTriggerEnter(Collider collider)
+    void HitEnemy(GameObject hitObject, bool isHeadShot)
     {
-        if (collider.gameObject.tag == "Enemy")
-        {
-            Debug.Log("Enemy hit");
-            collider.SendMessage("Hit", bulletDMG, SendMessageOptions.DontRequireReceiver);
-            Destroy(gameObject);
-        }
+        GameObject enemy = hitObject.transform.root.gameObject; //Get the root of the object that was hit;
+
+        float damageMultiplier = isHeadShot ? 1.5f : 1f;
+        float damage = bulletDMG * damageMultiplier;
+
+        enemy.SendMessage("Hit", damage, SendMessageOptions.DontRequireReceiver);
+        Destroy(gameObject);
     }
 }
