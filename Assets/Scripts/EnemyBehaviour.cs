@@ -9,6 +9,8 @@ public class EnemyBehaviour : MonoBehaviour
     Transform target;
     float remainingHealth;
     public GameObject healthBar;
+    public delegate void DeadEnemy();
+    public static event DeadEnemy enemyDeath;
 
     void Start()
     {
@@ -38,6 +40,7 @@ public class EnemyBehaviour : MonoBehaviour
 
     public void Die()
     {
+        if (enemyDeath != null) { enemyDeath(); }
         Destroy(gameObject);
     }
 
