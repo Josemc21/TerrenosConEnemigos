@@ -1,16 +1,15 @@
 using System.Collections;
+using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
-using Unity.AI.Navigation;
 
 public class Hordas : MonoBehaviour
 {
     public ValoresEnemigos[] valoresEnemigos;
     int numHordaActual = 0;
     bool generandoHorda = false;
-    //public GameObject textoNumHordas;
     NavMeshSurface navMeshSurface;
-    Transform playerTransform;
+    GameObject playerObject;
     public int enemigosRestantes;
     public static int enemigosTotalesRonda;
     public delegate void NextRound();
@@ -19,9 +18,16 @@ public class Hordas : MonoBehaviour
     void Start()
     {
         navMeshSurface = FindObjectOfType<NavMeshSurface>();
-        playerTransform = transform;
-        NextHorda();
-        EnemyBehaviour.enemyDeath += EnemigoMuerto;
+        playerObject = GameObject.FindGameObjectWithTag("Player");
+        if (playerObject == null)
+        {
+            Debug.LogError("Player object not found. Ensure that there is an object tagged as 'Player'.");
+        }
+        else
+        {
+            NextHorda();
+            EnemyBehaviour.enemyDeath += EnemigoMuerto;
+        }
     }
 
     void NextHorda()
@@ -50,7 +56,7 @@ public class Hordas : MonoBehaviour
                     if (!generandoHorda)
                         yield break;
 
-                    Vector3 spawnPosition = RandomNavmeshLocationAroundPlayer(200f, 200f);
+                    Vector3 spawnPosition = RandomNavmeshLocationAroundPlayer();
                     GameObject newEnemy = Instantiate(horda.tiposEnemigos[i], spawnPosition, Quaternion.identity);
                     enemigosRestantes++;
 
@@ -94,32 +100,30 @@ public class Hordas : MonoBehaviour
         }
     }
 
-    Vector3 RandomNavmeshLocationAroundPlayer(float minRadius, float maxRadius)
+    Vector3 RandomNavmeshLocationAroundPlayer()
     {
-        // Obtiene el centro del NavMesh
-        Vector3 navMeshCenter = navMeshSurface.transform.position;
-
-        // Genera una dirección aleatoria en el plano XZ (horizontal)
-        Vector3 randomDirection = Random.insideUnitSphere;
-        randomDirection.y = 0f; // Asegura que la dirección sea horizontal
-
-        // Genera una distancia aleatoria dentro del rango especificado
-        float distance = Random.Range(minRadius, maxRadius);
-
-        // Aplica la distancia aleatoria a la dirección aleatoria
-        Vector3 randomPosition = navMeshCenter + distance * randomDirection.normalized;
-
-        // Muestra la posición aleatoria en el NavMesh
-        NavMeshHit hit;
-        if (NavMesh.SamplePosition(randomPosition, out hit, maxRadius, NavMesh.AllAreas))
+        if (playerObject != null)
         {
-            return hit.position;
+            // Obtiene la posición del jugador
+            Vector3 playerPosition = playerObject.transform.position;
+
+            // Genera una dirección aleatoria en el plano XZ (horizontal)
+            Vector3 randomDirection = Random.insideUnitSphere;
+            randomDirection.y = 0f; // Asegura que la dirección sea horizontal
+
+            // Aplica la distancia fija de 50 unidades alrededor del jugador
+            Vector3 randomPosition = playerPosition + randomDirection.normalized * 100f;
+
+            // Muestra la posición aleatoria en el NavMesh
+            NavMeshHit hit;
+            if (NavMesh.SamplePosition(randomPosition, out hit, 100f, NavMesh.AllAreas))
+            {
+                return hit.position;
+            }
         }
-        else
-        {
-            // Si la muestra de posición falla, devuelve la posición del jugador
-            return playerTransform.position;
-        }
+
+        // Si hay algún problema, devuelve la posición del jugador
+        return playerObject.transform.position;
     }
 
     void OnDestroy()
