@@ -1,10 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEditor;
-using UnityEditor.Experimental;
 
 public class UIControl : MonoBehaviour
 {
@@ -15,10 +10,9 @@ public class UIControl : MonoBehaviour
     [Header("Round Counter")]
     public Text roundNumber;
     private int activeRound = 1;
-    private bool roundIncreased = false;
 
     [Header("Enemy Counter")]
-    private GameObject[] totalEnemies;
+    private int totalEnemies;
     public Text totalCounter;
     private bool reduceEnemy;
     private float enemiesAlive = 0;
@@ -29,6 +23,8 @@ public class UIControl : MonoBehaviour
     {   
         // Enemy Death Subscription
         EnemyBehaviour.enemyDeath += UpdateAliveCounter;
+        Hordas.nextRound += UpdateRoundCounter;
+        Hordas.nextRound += UpdateEnemyCounter;
     }
 
     void Update()
@@ -42,13 +38,12 @@ public class UIControl : MonoBehaviour
         // Get Total Enemies on Round Start
         if (roundStart)
         {
-            totalEnemies = GameObject.FindGameObjectsWithTag("Enemy");
-            enemiesAlive = totalEnemies.Length;
+            totalEnemies = Hordas.enemigosTotalesRonda;
             roundStart = false;
         }
 
         // Update Counter
-        totalCounter.text = "" + enemiesAlive + " / " + totalEnemies.Length;
+        totalCounter.text = "" + enemiesAlive + " / " + totalEnemies;
 
         /*************  TIMER  *************/
         
@@ -57,23 +52,26 @@ public class UIControl : MonoBehaviour
         int minutes = Mathf.FloorToInt(elapsedTime / 60);
         int seconds = Mathf.FloorToInt(elapsedTime % 60);
         timer.text = string.Format("{0:00}:{1:00}", minutes, seconds); 
-
-        /*************  ROUND COUNTER  *************/
-
-        // Round Update
-        if (enemiesAlive <= 0 && !roundStart && !roundIncreased) {
-            activeRound++;
-            roundIncreased = true;
-        }
-        roundNumber.text = "" + activeRound;
     }
 
     void UpdateAliveCounter() 
     { 
         if (reduceEnemy) 
         { 
-            enemiesAlive--; 
+            enemiesAlive++; 
             reduceEnemy = false;
         }
+    }
+
+    /*************  ROUND COUNTER  *************/
+    void UpdateRoundCounter()
+    {
+        activeRound++;
+        roundNumber.text = "" + activeRound;
+    }
+
+    void UpdateEnemyCounter() {
+        totalEnemies = Hordas.enemigosTotalesRonda;
+        enemiesAlive = 0;
     }
 }
