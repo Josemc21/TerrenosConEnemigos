@@ -33,7 +33,7 @@ public class ShootWeapon : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (Time.time >= nextShot && Input.GetMouseButtonDown(0))
+        if (Time.time >= nextShot && Input.GetMouseButton(0))
         {
             // Find the object with the "BulletExit" tag
             GameObject bulletExit = GameObject.FindWithTag("BulletExit");
